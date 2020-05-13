@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Grid : MonoBehaviour
+public class World : MonoBehaviour
 {
     public Vector2Int maxSize;
     public Vector2Int minSize;
@@ -18,6 +18,9 @@ public class Grid : MonoBehaviour
 
     public Keyboard kb;
     public WordChecker wordChecker;
+
+    public AudioClip killSound;
+    public AudioClip damageSound;
 
     private Tile[,] grid;
     private Vector2Int size;
@@ -48,10 +51,16 @@ public class Grid : MonoBehaviour
     {
         foreach(var entity in entities)
         {
+            if (entity == player) continue;
+
             if (Vector2Int.Distance(player.position, entity.position) == 1.0f && combatTarget == null)
             {
                 StartCombat(entity);
+            } else
+            {
+                entity.Tick(this);
             }
+
         }
     }
 
@@ -96,12 +105,19 @@ public class Grid : MonoBehaviour
                 Destroy(combatTarget.gameObject);
 
                 // TODO WT: Player reward
+                AudioSource.PlayClipAtPoint(killSound, transform.position);
 
                 EndCombat();
+            } else
+            {
+                AudioSource.PlayClipAtPoint(damageSound, transform.position);
             }
         } else
         {
             player.hitpoints--;
+
+            AudioSource.PlayClipAtPoint(damageSound, transform.position);
+
             if (player.hitpoints == 0)
             {
                 // Restart Game.
@@ -109,9 +125,9 @@ public class Grid : MonoBehaviour
         }
     }
 
-    public void MovePlayer(Vector2Int direction)
+    public void TryMove(GridEntity entity, Vector2Int delta)
     {
-        var newPos = player.position + direction;
+        var newPos = entity.position + delta;
 
         newPos.x = Mathf.Clamp(newPos.x, 0, size.x - 1);
         newPos.y = Mathf.Clamp(newPos.y, 0, size.y - 1);
@@ -140,18 +156,23 @@ public class Grid : MonoBehaviour
 
         // Check for entities too.
 
-        foreach(var entity in entities)
+        foreach (var e in entities)
         {
-            if (entity != player)
+            if (e != entity)
             {
-                if (newPos == entity.position)
+                if (newPos == e.position)
                 {
                     return;
                 }
             }
         }
 
-        player.position = newPos;
+        entity.position = newPos;
+    }
+
+    public void MovePlayer(Vector2Int delta)
+    {
+        TryMove(player, delta);
 
         TickEntities();
     }

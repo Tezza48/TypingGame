@@ -279,7 +279,7 @@ GameObject:
   - component: {fileID: 994314961}
   - component: {fileID: 994314960}
   m_Layer: 0
-  m_Name: Grid
+  m_Name: World
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -322,6 +322,8 @@ MonoBehaviour:
   - {fileID: 479981771}
   kb: {fileID: 1864186211}
   wordChecker: {fileID: 588459752}
+  killSound: {fileID: 8300000, guid: 6071f30e9a12cb24f8ebd23e12a3cc95, type: 3}
+  damageSound: {fileID: 8300000, guid: e4b91de3903b24444a0000f0dcbe0cb9, type: 3}
 --- !u!4 &994314961
 Transform:
   m_ObjectHideFlags: 0

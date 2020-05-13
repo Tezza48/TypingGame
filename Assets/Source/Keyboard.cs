@@ -18,13 +18,15 @@ public class Keyboard : MonoBehaviour
 
     public event BackspaceEvent OnBackspace;
 
+    public IKeyboardTarget target;
+
     private string currentString;
 
     public bool modeLocked;
     public bool isTypingMode;
 
     // Should be a world object, not move the player directly.
-    public Grid grid;
+    public World grid;
 
     // Start is called before the first frame update
     void Start()
@@ -36,8 +38,9 @@ public class Keyboard : MonoBehaviour
         KeyboardInput.current.onTextInput += handleKeyboardKeyPressed;
 
         OnKeyPressed += handleKeyPressed;
-        OnBackspace += handleBackspace;
+        OnStringChanged += handleStringChanged;
         OnStringSubmitted += handleSubmit;
+        OnBackspace += handleBackspace;
     }
 
     // Update is called once per frame
@@ -83,17 +86,41 @@ public class Keyboard : MonoBehaviour
                 case 'd':
                     grid.MovePlayer(Vector2Int.right);
                     break;
+                case ' ':
+                    grid.TickEntities();
+                    break;
                 default:
                     break;
             }
         }
     }
 
-    private void handleSubmit(string s)
+    private void handleKeyPressed(char c)
+    {
+        if (char.IsWhiteSpace(c) && c != ' ')
+        {
+            return;
+        }
+
+        currentString += c;
+
+        OnStringChanged?.Invoke(currentString);
+
+        target?.KeyPressed(c);
+    }
+
+    private void handleStringChanged(string value)
+    {
+        target?.StringChanged(value);
+    }
+
+    private void handleSubmit(string value)
     {
         currentString = "";
 
         OnStringChanged?.Invoke(currentString);
+
+        target?.StringSubmitted(value);
     }
 
     private void handleBackspace()
@@ -112,17 +139,7 @@ public class Keyboard : MonoBehaviour
         }
         
         OnStringChanged?.Invoke(currentString);
-    }
 
-    private void handleKeyPressed(char c)
-    {
-        if (char.IsWhiteSpace(c) && c != ' ')
-        {
-            return;
-        }
-
-        currentString += c;
-
-        OnStringChanged?.Invoke(currentString);
+        target?.Backspace();
     }
 }

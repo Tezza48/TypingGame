@@ -73,7 +73,7 @@ public class WordChecker : MonoBehaviour
             CorrectWord();
         } else
         {
-
+            IncorrectWord();
         }
     }
 }
