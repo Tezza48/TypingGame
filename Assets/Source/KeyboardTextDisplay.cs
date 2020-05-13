@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 public class KeyboardTextDisplay : MonoBehaviour
 {
+    [SerializeReference]
     public Keyboard kb;
     private Text textDisplay;
 
@@ -17,6 +18,13 @@ public class KeyboardTextDisplay : MonoBehaviour
 
     private void handleStringChanged(string s)
     {
+        if (textDisplay.IsDestroyed())
+        {
+            kb.OnStringChanged -= handleStringChanged;
+
+            return;
+        }
+
         textDisplay.text = s + '|';
     }
 

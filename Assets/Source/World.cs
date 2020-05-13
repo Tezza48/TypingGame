@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class World : MonoBehaviour
+public class World : MonoBehaviour, IKeyboardTarget
 {
+    public delegate void CombatStartEvent(GridEntity enemy);
+    public event CombatStartEvent OnCombatStarted;
+
     public Vector2Int maxSize;
     public Vector2Int minSize;
 
@@ -13,14 +16,10 @@ public class World : MonoBehaviour
     public LevelStyle style;
     new public Camera camera;
 
+    // TODO WT: Out of this class.
     public GridEntity player;
     public List<GridEntity> entities;
-
-    public Keyboard kb;
-    public WordChecker wordChecker;
-
-    public AudioClip killSound;
-    public AudioClip damageSound;
+    // -    -   -   -   -   -   -
 
     private Tile[,] grid;
     private Vector2Int size;
@@ -29,12 +28,15 @@ public class World : MonoBehaviour
 
     private List<GameObject> spawnedTiles;
 
-    private GridEntity combatTarget;
+    private Transform tilesContainer;
 
     // Start is called before the first frame update
     void Start()
     {
         tilePrefabs = tilePrefabsEditor.ToDictionary(element => element.tile, element => element.renderer);
+
+        tilesContainer = new GameObject("Tiles").transform;
+        tilesContainer.SetParent(transform);
 
         spawnedTiles = new List<GameObject>();
 
@@ -49,78 +51,20 @@ public class World : MonoBehaviour
 
     public void TickEntities()
     {
+        bool hasStartedCombat = false;
+
         foreach(var entity in entities)
         {
             if (entity == player) continue;
 
-            if (Vector2Int.Distance(player.position, entity.position) == 1.0f && combatTarget == null)
+            // TODO WT: Support multiple attackers.
+            if (!hasStartedCombat && Vector2Int.Distance(player.position, entity.position) == 1.0f)
             {
-                StartCombat(entity);
+                OnCombatStarted?.Invoke(entity);
+                hasStartedCombat = true;
             } else
             {
                 entity.Tick(this);
-            }
-
-        }
-    }
-
-    private void StartCombat(GridEntity entity)
-    {
-        // Enter Combat mode.
-        kb.isTypingMode = true;
-        kb.modeLocked = true;
-
-        wordChecker.enabled = true;
-
-        combatTarget = entity;
-
-        wordChecker.OnWordSubmitted += handleCombatWord;
-
-        // TODO WT: Feedback for entering combat.
-
-        Debug.Log("Entered Combat");
-    }
-
-    private void EndCombat()
-    {
-        kb.modeLocked = false;
-        kb.isTypingMode = false;
-        wordChecker.enabled = false;
-
-        combatTarget = null;
-
-        wordChecker.OnWordSubmitted -= handleCombatWord;
-
-        Debug.Log("Left Combat");
-    }
-
-    private void handleCombatWord(bool correct)
-    {
-        if (correct)
-        {
-            combatTarget.hitpoints--;
-            if (combatTarget.hitpoints == 0)
-            {
-                entities.Remove(combatTarget);
-                Destroy(combatTarget.gameObject);
-
-                // TODO WT: Player reward
-                AudioSource.PlayClipAtPoint(killSound, transform.position);
-
-                EndCombat();
-            } else
-            {
-                AudioSource.PlayClipAtPoint(damageSound, transform.position);
-            }
-        } else
-        {
-            player.hitpoints--;
-
-            AudioSource.PlayClipAtPoint(damageSound, transform.position);
-
-            if (player.hitpoints == 0)
-            {
-                // Restart Game.
             }
         }
     }
@@ -248,7 +192,7 @@ public class World : MonoBehaviour
             {
                 var tile = grid[x, y];
 
-                var instance = Instantiate(tilePrefabs[tile], new Vector2(x, y), Quaternion.identity, transform);
+                var instance = Instantiate(tilePrefabs[tile], new Vector2(x, y), Quaternion.identity, tilesContainer);
                 instance.color = style.Get(tile);
 
                 spawnedTiles.Add(instance.gameObject);
@@ -260,6 +204,46 @@ public class World : MonoBehaviour
     {
         var enemy = Instantiate(enemyPrefab, (Vector2)(size / 2), Quaternion.identity, transform);
         entities.Add(enemy);
+    }
+
+    public void KeyPressed(char key)
+    {
+        // Handle Moving
+        switch (key)
+        {
+            case 'w':
+                MovePlayer(Vector2Int.up);
+                break;
+            case 'a':
+                MovePlayer(Vector2Int.left);
+                break;
+            case 's':
+                MovePlayer(Vector2Int.down);
+                break;
+            case 'd':
+                MovePlayer(Vector2Int.right);
+                break;
+            case ' ':
+                TickEntities();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void StringChanged(string value)
+    {
+
+    }
+
+    public void StringSubmitted(string value)
+    {
+
+    }
+
+    public void Backspace()
+    {
+
     }
 }
 

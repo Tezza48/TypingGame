@@ -220,53 +220,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &588459751
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 588459753}
-  - component: {fileID: 588459752}
-  m_Layer: 0
-  m_Name: WordChecker
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &588459752
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 588459751}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e82ff022e4437ec4c8a2f162b86b02cf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  wordsFile: {fileID: 4900000, guid: f98e347ce8ac0f5488395e2c6b066dc0, type: 3}
-  kb: {fileID: 1864186211}
-  currentWordText: {fileID: 1464323687}
---- !u!4 &588459753
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 588459751}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &994314959
 GameObject:
@@ -320,10 +274,6 @@ MonoBehaviour:
   entities:
   - {fileID: 7735428244126896597}
   - {fileID: 479981771}
-  kb: {fileID: 1864186211}
-  wordChecker: {fileID: 588459752}
-  killSound: {fileID: 8300000, guid: 6071f30e9a12cb24f8ebd23e12a3cc95, type: 3}
-  damageSound: {fileID: 8300000, guid: e4b91de3903b24444a0000f0dcbe0cb9, type: 3}
 --- !u!4 &994314961
 Transform:
   m_ObjectHideFlags: 0
@@ -338,7 +288,7 @@ Transform:
   - {fileID: 1102591248}
   - {fileID: 479981770}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1102591248 stripped
 Transform:
@@ -609,6 +559,71 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &1524443776
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1524443777}
+  - component: {fileID: 1524443778}
+  - component: {fileID: 1524443779}
+  m_Layer: 0
+  m_Name: Game
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1524443777
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1524443776}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1524443778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1524443776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4c6d417d31dd2548a38b2f19c3046ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  keyboard: {fileID: 1864186211}
+  world: {fileID: 994314960}
+  combatSystem: {fileID: 1524443779}
+  keyboardDisplay: {fileID: 1913406108}
+--- !u!114 &1524443779
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1524443776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 887a7e5de84ed9e44bfecb577a0e7580, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wordsFile: {fileID: 4900000, guid: f98e347ce8ac0f5488395e2c6b066dc0, type: 3}
+  currentWordText: {fileID: 1464323687}
+  player: {fileID: 7735428244126896597}
+  killSound: {fileID: 8300000, guid: 6071f30e9a12cb24f8ebd23e12a3cc95, type: 3}
+  damageSound: {fileID: 8300000, guid: e4b91de3903b24444a0000f0dcbe0cb9, type: 3}
 --- !u!1001 &1718794497
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -717,9 +732,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68c8a36494e653343880e4c9e58c14ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  modeLocked: 0
-  isTypingMode: 0
-  grid: {fileID: 994314960}
 --- !u!4 &1864186212
 Transform:
   m_ObjectHideFlags: 0

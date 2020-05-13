@@ -17,22 +17,14 @@ public class Keyboard : MonoBehaviour
     public event StringEvent OnStringChanged;
 
     public event BackspaceEvent OnBackspace;
-
+    
     public IKeyboardTarget target;
 
     private string currentString;
 
-    public bool modeLocked;
-    public bool isTypingMode;
-
-    // Should be a world object, not move the player directly.
-    public World grid;
-
     // Start is called before the first frame update
     void Start()
     {
-        modeLocked = false;
-
         currentString = "";
 
         KeyboardInput.current.onTextInput += handleKeyboardKeyPressed;
@@ -48,11 +40,6 @@ public class Keyboard : MonoBehaviour
     {
         var current = KeyboardInput.current;
 
-        if (current.tabKey.wasReleasedThisFrame && !modeLocked)
-        {
-            isTypingMode = !isTypingMode;
-        }
-
         if (current.backspaceKey.wasPressedThisFrame)
         {
             OnBackspace?.Invoke();
@@ -64,35 +51,15 @@ public class Keyboard : MonoBehaviour
         }
     }
 
+    public void Clear()
+    {
+        currentString = "";
+        OnStringChanged?.Invoke(currentString);
+    }
+
     private void handleKeyboardKeyPressed(char c)
     {
-        if (isTypingMode)
-        {
-            OnKeyPressed.Invoke(c);
-        } else
-        {
-            // Handle Moving
-            switch (c)
-            {
-                case 'w':
-                    grid.MovePlayer(Vector2Int.up);
-                    break;
-                case 'a':
-                    grid.MovePlayer(Vector2Int.left);
-                    break;
-                case 's':
-                    grid.MovePlayer(Vector2Int.down);
-                    break;
-                case 'd':
-                    grid.MovePlayer(Vector2Int.right);
-                    break;
-                case ' ':
-                    grid.TickEntities();
-                    break;
-                default:
-                    break;
-            }
-        }
+        OnKeyPressed.Invoke(c);
     }
 
     private void handleKeyPressed(char c)
