@@ -57,14 +57,13 @@ public class World : MonoBehaviour, IKeyboardTarget
         {
             if (entity == player) continue;
 
+            entity.Tick(this);
+
             // TODO WT: Support multiple attackers.
             if (!hasStartedCombat && Vector2Int.Distance(player.position, entity.position) == 1.0f)
             {
                 OnCombatStarted?.Invoke(entity);
                 hasStartedCombat = true;
-            } else
-            {
-                entity.Tick(this);
             }
         }
     }

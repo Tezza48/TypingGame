@@ -67,8 +67,8 @@ public class CombatSystem : MonoBehaviour, IKeyboardTarget
     {
         AudioClip clip;
 
-        defender.hitpoints--;
-        if (defender.hitpoints == 0)
+        defender.Hitpoints--;
+        if (defender.Hitpoints == 0)
         {
             OnCombatComplete?.Invoke(attacker, defender);
 
