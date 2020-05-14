@@ -32,7 +32,7 @@ public class Game : MonoBehaviour
         {
             world.entities.Remove(loser);
 
-            Destroy(loser.gameObject);
+            Destroy(loser.gameObject);// Do this next frame
         } else
         {
             // Player lost, start game over.

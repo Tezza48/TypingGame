@@ -30,6 +30,9 @@ public class World : MonoBehaviour, IKeyboardTarget
 
     private Transform tilesContainer;
 
+    // TODO WT: queue entities to be removed, destroy them in the next update.
+    //private List<GridEntity> destroyQueue;
+
     // Start is called before the first frame update
     void Start()
     {

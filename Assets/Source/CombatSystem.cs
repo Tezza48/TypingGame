@@ -10,6 +10,8 @@ public class CombatSystem : MonoBehaviour, IKeyboardTarget
     public event CombatCompleteEvent OnCombatComplete;
 
     public TextAsset wordsFile;
+
+    // TODO WT: Move this into CombatDisplay.
     public Text currentWordText;
 
     private string[] wordsList;
@@ -20,6 +22,8 @@ public class CombatSystem : MonoBehaviour, IKeyboardTarget
 
     public AudioClip killSound;
     public AudioClip damageSound;
+
+    public CombatDisplay display;
 
     void Start()
     {
@@ -36,6 +40,8 @@ public class CombatSystem : MonoBehaviour, IKeyboardTarget
         NewRandomWord();
 
         currentWordText.gameObject.SetActive(true);
+
+        display.Show(enemy);
     }
 
     private void NewRandomWord()
@@ -70,6 +76,8 @@ public class CombatSystem : MonoBehaviour, IKeyboardTarget
         defender.Hitpoints--;
         if (defender.Hitpoints == 0)
         {
+            display.Hide();
+
             OnCombatComplete?.Invoke(attacker, defender);
 
             clip = killSound;
