@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class World : MonoBehaviour, IKeyboardTarget
+public class WorldSystem : MonoBehaviour, IKeyboardTarget
 {
+    static readonly RectangleGenerator RECTANGLE_GENERATOR = new RectangleGenerator();
+
     public delegate void CombatStartEvent(GridEntity enemy);
     public event CombatStartEvent OnCombatStarted;
 
-    public Vector2Int maxSize;
-    public Vector2Int minSize;
+    public LevelDefenition levelDef;
 
     public TilePair[] tilePrefabsEditor;
     public GridEntity enemyPrefab;
-    public LevelStyle style;
     new public Camera camera;
 
     // TODO WT: Out of this class.
@@ -21,10 +21,10 @@ public class World : MonoBehaviour, IKeyboardTarget
     public List<GridEntity> entities;
     // -    -   -   -   -   -   -
 
-    private Tile[,] grid;
-    private Vector2Int size;
+
+    private LevelData level;
+
     private Dictionary<Tile, SpriteRenderer> tilePrefabs;
-    private Vector2Int entrance;
 
     private List<GameObject> spawnedTiles;
 
@@ -75,11 +75,11 @@ public class World : MonoBehaviour, IKeyboardTarget
     {
         var newPos = entity.position + delta;
 
-        newPos.x = Mathf.Clamp(newPos.x, 0, size.x - 1);
-        newPos.y = Mathf.Clamp(newPos.y, 0, size.y - 1);
+        newPos.x = Mathf.Clamp(newPos.x, 0, level.size.x - 1);
+        newPos.y = Mathf.Clamp(newPos.y, 0, level.size.y - 1);
 
         // Check against level geometry
-        var tile = grid[newPos.x, newPos.y];
+        var tile = level.tiles[newPos.x, newPos.y];
         switch (tile)
         {
             case Tile.Wall:
@@ -123,7 +123,7 @@ public class World : MonoBehaviour, IKeyboardTarget
         TickEntities();
     }
 
-    private void NewLevel(bool clear = true)
+    private void NewLevel()
     {
         ClearLevel();
 
@@ -131,11 +131,11 @@ public class World : MonoBehaviour, IKeyboardTarget
         InstantiateGrid();
         SpawnEntities();
 
-        camera.backgroundColor = style.background;
-        camera.transform.position = new Vector3(size.x / 2, size.y / 2, -10);
-        camera.orthographicSize = size.magnitude / 2;
+        camera.backgroundColor = level.style.background;
+        camera.transform.position = new Vector3(level.size.x / 2, level.size.y / 2, -10);
+        camera.orthographicSize = level.size.magnitude / 2;
         
-        player.transform.position = new Vector2(entrance.x, entrance.y);
+        player.transform.position = new Vector2(level.entrance.x, level.entrance.y);
     }
 
     private void ClearLevel()
@@ -161,41 +161,31 @@ public class World : MonoBehaviour, IKeyboardTarget
 
     private void GenerateGrid()
     {
-        size.x = Random.Range(minSize.x, maxSize.x);
-        size.y = Random.Range(minSize.y, maxSize.y);
+        BaseGenerator generator;
 
-        grid = new Tile[size.x, size.y];
-
-        for (int y = 0; y < size.y; y++)
+        switch (levelDef.type)
         {
-            for (int x = 0; x < size.x; x++)
-            {
-                if (y > 0 && y < size.y - 1 && x > 0 && x < size.x - 1)
-                {
-                    grid[x, y] = Tile.Floor;
-                } else
-                {
-                    grid[x, y] = Tile.Wall;
-                }
-            }
+            case GeneratorType.Rectangle:
+                generator = RECTANGLE_GENERATOR;
+                break;
+            default:
+                generator = RECTANGLE_GENERATOR; // Default to Rectangle.
+                break;
         }
 
-        entrance = new Vector2Int(size.x / 2, 0);
-        grid[entrance.x, entrance.y] = Tile.Entrance;
-
-        grid[size.x / 2, size.y - 1] = Tile.Exit;
+        level = generator.Generate(levelDef);
     }
 
     private void InstantiateGrid()
     {
-        for (int y = 0; y < size.y; y++)
+        for (int y = 0; y < level.size.y; y++)
         {
-            for (int x = 0; x < size.x; x++)
+            for (int x = 0; x < level.size.x; x++)
             {
-                var tile = grid[x, y];
+                var tile = level.tiles[x, y];
 
                 var instance = Instantiate(tilePrefabs[tile], new Vector2(x, y), Quaternion.identity, tilesContainer);
-                instance.color = style.Get(tile);
+                instance.color = level.style.Get(tile);
 
                 spawnedTiles.Add(instance.gameObject);
             }
@@ -204,8 +194,11 @@ public class World : MonoBehaviour, IKeyboardTarget
 
     private void SpawnEntities()
     {
-        var enemy = Instantiate(enemyPrefab, (Vector2)(size / 2), Quaternion.identity, transform);
-        entities.Add(enemy);
+        foreach (var spawn in level.mobSpawns)
+        {
+            var instance = Instantiate(enemyPrefab, (Vector2)spawn, Quaternion.identity, transform);
+            entities.Add(instance);
+        }
     }
 
     public void KeyPressed(char key)

@@ -6,7 +6,7 @@ public class Game : MonoBehaviour
 {
     public Keyboard keyboard;
 
-    public World world;
+    public WorldSystem worldSystem;
     public CombatSystem combatSystem;
 
     public KeyboardTextDisplay keyboardDisplay;
@@ -22,15 +22,15 @@ public class Game : MonoBehaviour
     {
         nextState = BASE_STATE.Init(State.World);
 
-        world.OnCombatStarted += handleCombatStarted;
+        worldSystem.OnCombatStarted += handleCombatStarted;
         combatSystem.OnCombatComplete += handleCombatFinished;
     }
 
     private void handleCombatFinished(GridEntity winner, GridEntity loser)
     {
-        if (winner == world.player)
+        if (winner == worldSystem.player)
         {
-            world.entities.Remove(loser);
+            worldSystem.entities.Remove(loser);
 
             Destroy(loser.gameObject);// Do this next frame
         } else
@@ -55,7 +55,7 @@ public class Game : MonoBehaviour
             switch (nextState.state)
             {
                 case State.World:
-                    keyboard.target = world;
+                    keyboard.target = worldSystem;
 
                     keyboardDisplay.gameObject.SetActive(false);
                     break;

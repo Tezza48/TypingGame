@@ -26,13 +26,16 @@ public class CombatDisplay : MonoBehaviour
         gameObject.SetActive(true);
 
         handleEntityHitpoints(entity.Hitpoints);
+
         entity.OnHitpointsChanged += handleEntityHitpoints;
+        this.entity = entity;
     }
 
     public void Hide()
     {
         gameObject.SetActive(false);
 
+        entity.OnHitpointsChanged -= handleEntityHitpoints;
         entity = null;
     }
 

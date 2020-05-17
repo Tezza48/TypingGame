@@ -5,6 +5,8 @@ using KeyboardInput = UnityEngine.InputSystem.Keyboard;
 
 // TODO WT: feedback for when typing mode has started
 
+// BUG WT: Sometimes submit events get sent while held, this should only ever send on key down.
+
 public class Keyboard : MonoBehaviour
 {
     public delegate void CharEvent(char c);
@@ -27,6 +29,8 @@ public class Keyboard : MonoBehaviour
     {
         currentString = "";
 
+        // TODO WT: This probably needs to be queued and handled synchronously in Update.
+        // Events appear to cause issues
         KeyboardInput.current.onTextInput += handleKeyboardKeyPressed;
 
         OnKeyPressed += handleKeyPressed;

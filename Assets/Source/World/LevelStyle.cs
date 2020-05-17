@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "LevelStyle/")]
+[CreateAssetMenu(menuName = "World/LevelStyle")]
 public class LevelStyle : ScriptableObject
 {
     public Color wall;

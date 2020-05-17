@@ -36,7 +36,7 @@ public class GridEntity : MonoBehaviour
         
     }
 
-    public void Tick(World grid)
+    public void Tick(WorldSystem grid)
     {
         // Enemy Move
         grid.TryMove(this, new Vector2Int(Random.Range(-1, 2), Random.Range(-1, 2)));
