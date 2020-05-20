@@ -396,7 +396,6 @@ MonoBehaviour:
       type: 3}
   enemyPrefab: {fileID: 4004114293936969108, guid: f04e5d2225430b847856ac740998d8bf,
     type: 3}
-  style: {fileID: 11400000, guid: 49535b28fd9653047a2f23f9d505ea90, type: 2}
   camera: {fileID: 519420031}
   player: {fileID: 7735428244126896597}
   entities:

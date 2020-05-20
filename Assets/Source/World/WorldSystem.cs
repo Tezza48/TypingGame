@@ -6,6 +6,7 @@ using UnityEngine;
 public class WorldSystem : MonoBehaviour, IKeyboardTarget
 {
     static readonly RectangleGenerator RECTANGLE_GENERATOR = new RectangleGenerator();
+    static readonly DrunkenWalkGenerator WALK_GENERATOR = new DrunkenWalkGenerator();
 
     public delegate void CombatStartEvent(GridEntity enemy);
     public event CombatStartEvent OnCombatStarted;
@@ -42,7 +43,7 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
         tilesContainer.SetParent(transform);
 
         spawnedTiles = new List<GameObject>();
-
+        
         NewLevel();
     }
 
@@ -56,8 +57,9 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
     {
         bool hasStartedCombat = false;
 
-        foreach(var entity in entities)
+        for (int i = 0; i < entities.Count; i++)
         {
+            var entity = entities[i];
             if (entity == player) continue;
 
             entity.Tick(this);
@@ -80,30 +82,16 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
 
         // Check against level geometry
         var tile = level.tiles[newPos.x, newPos.y];
-        switch (tile)
+        if (tile == Tile.Wall)
         {
-            case Tile.Wall:
-                // Cant walk on wall tiles.
-                return;
-            case Tile.Floor:
-                // Free to move on this
-                break;
-            case Tile.Entrance:
-                // Free to move on this
-                break;
-            case Tile.Exit:
-                // Should have a little delay here so we can see the player stand on the exit.
-                NewLevel();
-                // Move to next room
-                return;
-            default:
-                break;
+            return;
         }
 
         // Check for entities too.
 
-        foreach (var e in entities)
+        for (int i = 0; i < entities.Count; i++)
         {
+            var e = entities[i];
             if (e != entity)
             {
                 if (newPos == e.position)
@@ -119,6 +107,12 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
     public void MovePlayer(Vector2Int delta)
     {
         TryMove(player, delta);
+        
+        if (level.tiles[player.position.x, player.position.y] == Tile.Exit)
+        {
+            NewLevel();
+            return;
+        }
 
         TickEntities();
     }
@@ -140,16 +134,16 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
 
     private void ClearLevel()
     {
-        foreach(var tile in spawnedTiles)
+        for (int i = 0; i < spawnedTiles.Count; i++)
         {
-            Destroy(tile);
+            Destroy(spawnedTiles[i]);
         }
 
-        foreach(var entity in entities)
+        for (int i = 0; i < entities.Count; i++)
         {
-            if (entity != player)
+            if (entities[i] != player)
             {
-                Destroy(entity.gameObject);
+                Destroy(entities[i].gameObject);
             }
         }
 
@@ -167,6 +161,9 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
         {
             case GeneratorType.Rectangle:
                 generator = RECTANGLE_GENERATOR;
+                break;
+            case GeneratorType.DrunkenWalk:
+                generator = WALK_GENERATOR;
                 break;
             default:
                 generator = RECTANGLE_GENERATOR; // Default to Rectangle.
