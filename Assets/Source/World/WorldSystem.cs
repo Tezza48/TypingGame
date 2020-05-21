@@ -11,7 +11,7 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
     public delegate void CombatStartEvent(GridEntity enemy);
     public event CombatStartEvent OnCombatStarted;
 
-    public LevelDefenition levelDef;
+    public LevelDefenition[] levelDefs;
 
     public TilePair[] tilePrefabsEditor;
     public GridEntity enemyPrefab;
@@ -157,7 +157,9 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
     {
         BaseGenerator generator;
 
-        switch (levelDef.type)
+        var def = levelDefs[Random.Range(0, levelDefs.Length)];
+
+        switch (def.type)
         {
             case GeneratorType.Rectangle:
                 generator = RECTANGLE_GENERATOR;
@@ -170,7 +172,7 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
                 break;
         }
 
-        level = generator.Generate(levelDef);
+        level = generator.Generate(def);
     }
 
     private void InstantiateGrid()
@@ -237,6 +239,16 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
     {
 
     }
+
+#if UNITY_EDITOR
+    private void OnGUI()
+    {
+        if (GUILayout.Button("Generate"))
+        {
+            NewLevel();
+        }
+    }
+#endif
 }
 
 public enum Tile

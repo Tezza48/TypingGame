@@ -8,22 +8,48 @@ public enum GeneratorType
 {
     Rectangle,
     DrunkenWalk,
-    // Rooms,
+    Rooms,
 }
 
 public class BaseGenerator
 {
+    protected const float MOB_DENSITY = 0.05f;
+    protected const float MOB_DENSITY_DEVIANCE = 0.01f;
+
     public virtual LevelData Generate(LevelDefenition def)
     {
         var sizeX = Random.Range(def.minSize.x, def.maxSize.x);
         var sizeY = Random.Range(def.minSize.y, def.maxSize.y);
 
-       return new LevelData
+        return new LevelData
         {
             size = new Vector2Int(sizeX, sizeY),
             style = def.styles[Random.Range(0, def.styles.Length)],
             tiles = new Tile[sizeX, sizeY],
         };
+    }
+
+    protected Vector2Int[] GenerateSpawns(List<Vector2Int> clearTiles)
+    {
+        float populationPercent = MOB_DENSITY + Random.Range(-MOB_DENSITY_DEVIANCE, MOB_DENSITY_DEVIANCE);
+        int mobCount = (int)(populationPercent * clearTiles.Count);
+
+        ShuffleCollection(clearTiles);
+
+        return clearTiles.GetRange(0, mobCount).ToArray();
+    }
+
+    private void ShuffleCollection<T>(List<T> list)
+    {
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = Random.Range(0, n + 1);
+            T value = list[k];
+            list[k] = list[n];
+            list[n] = value;
+        }
     }
 }
 
@@ -33,7 +59,7 @@ public class RectangleGenerator: BaseGenerator
     {
         LevelData data = base.Generate(def);
 
-        Debug.Log(data.style.name);
+        var clearTiles = new List<Vector2Int>();
         
         for (int y = 0; y < data.size.y; y++)
         {
@@ -42,6 +68,7 @@ public class RectangleGenerator: BaseGenerator
                 if (y > 0 && y < data.size.y - 1 && x > 0 && x < data.size.x - 1)
                 {
                     data.tiles[x, y] = Tile.Floor;
+                    clearTiles.Add(new Vector2Int(x, y));
                 }
                 else
                 {
@@ -55,8 +82,10 @@ public class RectangleGenerator: BaseGenerator
 
         data.tiles[data.size.x / 2, data.size.y - 1] = Tile.Exit;
 
-        data.mobSpawns = new Vector2Int[] { data.size / 2 };
-        //data.mobSpawns = new Vector2Int[] { };
+        clearTiles.Remove(data.entrance);
+        clearTiles.Remove(data.exit);
+
+        data.mobSpawns = GenerateSpawns(clearTiles);
 
         return data;
     }
@@ -67,9 +96,6 @@ public class DrunkenWalkGenerator : BaseGenerator
     const int MAX_WALK = 10000;
     const float MIN_CLEAR = 0.25f;
     const float MAX_CLEAR = 0.5f;
-
-    const float MOB_DENSITY = 0.05f;
-    const float MOB_DENSITY_DEVIANCE = 0.01f;
 
     public override LevelData Generate(LevelDefenition def)
     {
@@ -84,13 +110,13 @@ public class DrunkenWalkGenerator : BaseGenerator
         data.entrance = pos;
 
         // Fill with Walls;
-        Parallel.For(0, data.size.y, (y) =>
+        for (int y = 0; y < data.size.y; y++)
         {
-            for (int x = 0; x < data.size.x; x++)
+            Parallel.For(0, data.size.x, (x) =>
             {
                 data.tiles[x, y] = Tile.Wall;
-            }
-        });
+            });
+        }
 
         var clearTiles = new List<Vector2Int>();
 
@@ -136,37 +162,12 @@ public class DrunkenWalkGenerator : BaseGenerator
         
         clearTiles.Remove(data.exit);
         clearTiles.Remove(data.entrance);
-
-        // TODO WT: Populate with mobs.
-        var numMobs = (int)(cleared * (MOB_DENSITY + Random.Range(-MOB_DENSITY_DEVIANCE, MOB_DENSITY_DEVIANCE)));
-
-        data.mobSpawns = new Vector2Int[numMobs];
-        // build list of available places
-        // shuffle
-        ShuffleCollection(clearTiles);
-
-        // use first N elements in array as mob spawns.
-        for (int i = 0; i < numMobs; i++)
-        {
-            data.mobSpawns[i] = clearTiles[i];
-        }
+        
+        data.mobSpawns = GenerateSpawns(clearTiles);
 
         Debug.Log(string.Format("Total num tiles: {0}, NumMobs: {1}, cleared: {2}",
-            data.size.x * data.size.y, numMobs, cleared));
+            data.size.x * data.size.y, data.mobSpawns.Length, cleared));
 
         return data;
-    }
-
-    private void ShuffleCollection<T>(List<T> list)
-    {
-        int n = list.Count;
-        while (n > 1)
-        {
-            n--;
-            int k = Random.Range(0, n + 1);
-            T value = list[k];
-            list[k] = list[n];
-            list[n] = value;
-        }
     }
 }
