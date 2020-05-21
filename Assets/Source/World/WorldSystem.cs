@@ -16,6 +16,7 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
     public TilePair[] tilePrefabsEditor;
     public GridEntity enemyPrefab;
     new public Camera camera;
+    public float maxCameraSize = 10.0f;
 
     // TODO WT: Out of this class.
     public GridEntity player;
@@ -30,9 +31,6 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
     private List<GameObject> spawnedTiles;
 
     private Transform tilesContainer;
-
-    // TODO WT: queue entities to be removed, destroy them in the next update.
-    //private List<GridEntity> destroyQueue;
 
     // Start is called before the first frame update
     void Start()
@@ -50,7 +48,33 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
     // Update is called once per frame
     void Update()
     {
+        // Keep level in viewport if possible
+        // otherwise scroll view to target player with camera clamped to level bounds.
 
+        var targetSize = Mathf.Max(level.size.x / camera.aspect, level.size.y) / 2.0f;
+        var targetPos = (Vector2)player.transform.position;
+
+        camera.orthographicSize = Mathf.Min(targetSize, maxCameraSize);
+
+        var camHalfHeight = camera.orthographicSize;
+        var camHalfWidth = camera.aspect * camera.orthographicSize;
+
+        Vector2 camPos;
+
+        // TODO WT: Handle this per axis to stop the camera jumping left and right on thin levels.
+        if (targetSize > maxCameraSize)
+        {
+            camPos = (Vector2)player.transform.position + new Vector2(0.5f, 0.5f);
+
+            camPos.x = Mathf.Clamp(camPos.x, camHalfWidth - 0.5f, level.size.x - camHalfWidth - 0.5f);
+            camPos.y = Mathf.Clamp(camPos.y, camHalfHeight - 0.5f, level.size.y - camHalfHeight - 0.5f);
+        }
+        else
+        {
+            camPos = ((Vector2)level.size / 2.0f) - new Vector2(0.5f, 0.5f);
+        }
+
+        camera.transform.position = new Vector3(camPos.x, camPos.y, -10);
     }
 
     public void TickEntities()
@@ -127,7 +151,7 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
 
         camera.backgroundColor = level.style.background;
         camera.transform.position = new Vector3(level.size.x / 2, level.size.y / 2, -10);
-        camera.orthographicSize = level.size.magnitude / 2;
+        camera.orthographicSize = (level.size.y + 0.5f) / 2;
         
         player.transform.position = new Vector2(level.entrance.x, level.entrance.y);
     }
