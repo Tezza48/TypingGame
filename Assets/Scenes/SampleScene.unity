@@ -383,7 +383,6 @@ MonoBehaviour:
   levelDefs:
   - {fileID: 11400000, guid: 00a750c524e2112458898864644c653f, type: 2}
   - {fileID: 11400000, guid: d4ae1cf74457ef543982d58d7381c60c, type: 2}
-  - {fileID: 11400000, guid: 41dfd27c1f3597143a004bda4b55534d, type: 2}
   tilePrefabsEditor:
   - tile: 0
     renderer: {fileID: 6230951052192037211, guid: fae79212406f3a14f8ce2e492afb3faf,

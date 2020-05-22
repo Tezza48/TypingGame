@@ -48,33 +48,54 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
     // Update is called once per frame
     void Update()
     {
-        // Keep level in viewport if possible
-        // otherwise scroll view to target player with camera clamped to level bounds.
+        PositionCamera();
+    }
 
-        var targetSize = Mathf.Max(level.size.x / camera.aspect, level.size.y) / 2.0f;
-        var targetPos = (Vector2)player.transform.position;
+    private void PositionCamera(bool log = false)
+    {
+        camera.orthographicSize = Mathf.Min(level.size.y / 2.0f, maxCameraSize);
 
-        camera.orthographicSize = Mathf.Min(targetSize, maxCameraSize);
+        Vector2 camSize = new Vector2(camera.orthographicSize * camera.aspect, camera.orthographicSize);
+        Vector2 maxCamSize = new Vector2(maxCameraSize * camera.aspect, maxCameraSize);
 
-        var camHalfHeight = camera.orthographicSize;
-        var camHalfWidth = camera.aspect * camera.orthographicSize;
+        Vector2 playerPos = player.transform.position;
 
-        Vector2 camPos;
+        Vector2 camPos = new Vector2();
 
-        // TODO WT: Handle this per axis to stop the camera jumping left and right on thin levels.
-        if (targetSize > maxCameraSize)
+        bool scrollX = level.size.x / 2 > maxCamSize.x;
+        bool scrollY = level.size.y / 2 > maxCamSize.y;
+
+        if (scrollX)
         {
-            camPos = (Vector2)player.transform.position + new Vector2(0.5f, 0.5f);
-
-            camPos.x = Mathf.Clamp(camPos.x, camHalfWidth - 0.5f, level.size.x - camHalfWidth - 0.5f);
-            camPos.y = Mathf.Clamp(camPos.y, camHalfHeight - 0.5f, level.size.y - camHalfHeight - 0.5f);
+            camPos.x = playerPos.x + 0.5f;
+            camPos.x = Mathf.Clamp(camPos.x, camSize.x - 0.5f, level.size.x - camSize.x - 0.5f);
         }
         else
         {
-            camPos = ((Vector2)level.size / 2.0f) - new Vector2(0.5f, 0.5f);
+            camPos.x = (level.size.x / 2.0f) - 0.5f;
+        }
+
+        if (scrollY)
+        {
+            camPos.y = playerPos.y + 0.5f;
+            camPos.y = Mathf.Clamp(camPos.y, camSize.y - 0.5f, level.size.y - camSize.y - 0.5f);
+        }
+        else
+        {
+            camPos.y = (level.size.y / 2.0f) - 0.5f;
         }
 
         camera.transform.position = new Vector3(camPos.x, camPos.y, -10);
+
+        if (log)
+        {
+            Debug.Log(string.Format("Aspect: {0}, Size: {1}, \n" +
+                "CamSize: {2}, Max: {3}, \n" +
+                "Scroll X: {4}, Scroll Y: {5}", 
+                camera.aspect, camera.orthographicSize,
+                camSize.ToString(), maxCamSize.ToString(),
+                scrollX, scrollY));
+        }
     }
 
     public void TickEntities()
@@ -150,8 +171,7 @@ public class WorldSystem : MonoBehaviour, IKeyboardTarget
         SpawnEntities();
 
         camera.backgroundColor = level.style.background;
-        camera.transform.position = new Vector3(level.size.x / 2, level.size.y / 2, -10);
-        camera.orthographicSize = (level.size.y + 0.5f) / 2;
+        PositionCamera(true);
         
         player.transform.position = new Vector2(level.entrance.x, level.entrance.y);
     }

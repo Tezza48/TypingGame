@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -164,9 +164,6 @@ public class DrunkenWalkGenerator : BaseGenerator
         clearTiles.Remove(data.entrance);
         
         data.mobSpawns = GenerateSpawns(clearTiles);
-
-        Debug.Log(string.Format("Total num tiles: {0}, NumMobs: {1}, cleared: {2}",
-            data.size.x * data.size.y, data.mobSpawns.Length, cleared));
 
         return data;
     }
